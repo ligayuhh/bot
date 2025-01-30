@@ -14,14 +14,11 @@ current_email = None
 custom_email = None
 
 def get_domains():
-    try:
-        response = requests.get(f"{BASE_URL}/domains/{API_KEY}")
-        response.raise_for_status()
+    response = requests.get(f"{BASE_URL}/domains/{API_KEY}")
+    if response.status_code == 200:
         data = response.json()
         return data if isinstance(data, list) else data.get("domains", [])
-    except requests.RequestException as e:
-        print(f"Error fetching domains: {e}")
-        return []
+    return []
 
 def generate_email():
     global current_email
@@ -30,11 +27,7 @@ def generate_email():
         return None
     random_domain = random.choice(domains)
     email = "".join(random.choices(string.ascii_letters + string.digits, k=10)) + "@" + random_domain
-    try:
-        requests.get(f"{BASE_URL}/email/{email}/{API_KEY}")
-    except requests.RequestException as e:
-        print(f"Error registering email: {e}")
-        return None
+    requests.get(f"{BASE_URL}/email/{email}/{API_KEY}")
     current_email = email
     return email
 
@@ -45,28 +38,21 @@ def generate_custom_email(custom_prefix):
         return None
     random_domain = random.choice(domains)
     email = f"{custom_prefix}@{random_domain}"
-    try:
-        requests.get(f"{BASE_URL}/email/{email}/{API_KEY}")
-    except requests.RequestException as e:
-        print(f"Error registering custom email: {e}")
-        return None
+    requests.get(f"{BASE_URL}/email/{email}/{API_KEY}")
     custom_email = email
     return email
 
 def get_messages(email):
-    try:
-        response = requests.get(f"{BASE_URL}/messages/{email}/{API_KEY}")
-        response.raise_for_status()
+    response = requests.get(f"{BASE_URL}/messages/{email}/{API_KEY}")
+    if response.status_code == 200:
         data = response.json()
         return data if isinstance(data, list) else []
-    except requests.RequestException as e:
-        print(f"Error fetching messages: {e}")
-        return []
+    return []
 
 def clean_html(raw_html):
-    raw_html = re.sub(r'<style.*?>.*?</style>', '', raw_html, flags=re.DOTALL)  # Remove CSS
-    raw_html = re.sub(r'<.*?>', '', raw_html)  # Remove HTML tags
-    raw_html = re.sub(r'&[a-zA-Z0-9#]+;', '', raw_html)  # Remove HTML entities
+    raw_html = re.sub(r'<br\s*/?>', '\n', raw_html)  # Replace <br> with newlines
+    raw_html = re.sub(r'</p>', '\n\n', raw_html)  # Preserve paragraph spacing
+    raw_html = re.sub(r'<.*?>', '', raw_html)  # Remove all other HTML tags
     return raw_html.strip()
 
 @bot.message_handler(commands=['start', 'help'])
@@ -84,7 +70,9 @@ def custom_email_handler(message):
     if len(args) < 2:
         bot.reply_to(message, "Please provide a custom prefix. Example: /custom_email mycustomname")
         return
-    email = generate_custom_email(args[1])
+    
+    custom_prefix = args[1]
+    email = generate_custom_email(custom_prefix)
     bot.reply_to(message, f"Your Custom Email: {email}" if email else "Failed to generate a custom email. Try again later.")
 
 @bot.message_handler(commands=['genmail_inbox'])
@@ -93,6 +81,7 @@ def current_inbox(message):
     if not current_email:
         bot.reply_to(message, "No current random email generated. Use /genmail to generate one.")
         return
+    
     messages = get_messages(current_email)
     if messages:
         formatted_messages = [
@@ -109,6 +98,7 @@ def custom_inbox(message):
     if not custom_email:
         bot.reply_to(message, "No custom email generated. Use /custom_email <prefix> to create one.")
         return
+    
     messages = get_messages(custom_email)
     if messages:
         formatted_messages = [
