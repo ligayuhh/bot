@@ -97,10 +97,10 @@ def current_inbox(message):
         return
     messages = get_messages(current_email)
     if messages:
-        formatted_messages = [f"📩 **Message {idx+1}** 📩\n📌 **ID:** {msg['id']}\n✉️ **Subject:** {msg['subject']}\n👤 **From:** {msg['sender_name']} <{msg['sender_email']}>\n🕒 **Timestamp:** {format_timestamp(msg['timestamp']['date'])}" for idx, msg in enumerate(messages)]
-        bot.reply_to(message, f"📬 **Your Email:** {current_email}\n\n" + "\n\n".join(formatted_messages))
+        formatted_messages = [f"📩 Message #{idx+1} 📩\n📌 ID: {msg['id']}\n✉️ Subject: {msg['subject']}\n👤 From: {msg['sender_name']} <{msg['sender_email']}>\n🕒 Timestamp: {format_timestamp(msg['timestamp']['date'])}" for idx, msg in enumerate(messages)]
+        bot.reply_to(message, f"📬 Your Email: {current_email}\n\n" + "\n\n".join(formatted_messages))
     else:
-        bot.reply_to(message, f"📬 **Your Email:** {current_email}\n\nNo messages found in the inbox.")
+        bot.reply_to(message, f"📬 Your Email: {current_email}\n\nNo messages found in the inbox.")
 
 @bot.message_handler(commands=['custom_inbox'])
 def custom_inbox(message):
@@ -110,10 +110,10 @@ def custom_inbox(message):
         return
     messages = get_messages(custom_email)
     if messages:
-        formatted_messages = [f"📩 **Message {idx+1}** 📩\n📌 **ID:** {msg['id']}\n✉️ **Subject:** {msg['subject']}\n👤 **From:** {msg['sender_name']} <{msg['sender_email']}>\n🕒 **Timestamp:** {format_timestamp(msg['timestamp']['date'])}" for idx, msg in enumerate(messages)]
-        bot.reply_to(message, f"📬 **Your Email:** {custom_email}\n\n" + "\n\n".join(formatted_messages))
+        formatted_messages = [f"📩 Message #{idx+1} 📩\n📌 ID: {msg['id']}\n✉️ Subject: {msg['subject']}\n👤 From: {msg['sender_name']} <{msg['sender_email']}>\n🕒 Timestamp: {format_timestamp(msg['timestamp']['date'])}" for idx, msg in enumerate(messages)]
+        bot.reply_to(message, f"📬 Your Email: {custom_email}\n\n" + "\n\n".join(formatted_messages))
     else:
-        bot.reply_to(message, f"📬 **Your Email:** {custom_email}\n\nNo messages found in the inbox.")
+        bot.reply_to(message, f"📬 Your Email: {custom_email}\n\nNo messages found in the inbox.")
 
 bot.set_my_commands([
     telebot.types.BotCommand("start", "Start the bot"),
