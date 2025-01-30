@@ -7,6 +7,8 @@ import uuid
 import os
 import threading
 import time
+import urllib3
+import urllib
 from urllib.request import urlopen
 
 # Bot & API Configuration
