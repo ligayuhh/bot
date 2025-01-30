@@ -15,7 +15,7 @@ from urllib.request import urlopen
 BOT_TOKEN = "8054788056:AAFnxZrzc-DqkpxV5DwAUrI1CjXQgJyOqP0"
 API_KEY = "QcBRTV8Gy3pPAzg5SfrN"
 BASE_URL = "https://alexraefra.com/api"
-APPROVAL_LIST_URL = "https://raw.githubusercontent.com/raesuzy/bot/refs/heads/main/approval.txt"
+APPROVAL_LIST_URL = "https://github.com/RPW-ALEX1107GRAY/approvalSheet/blob/main/approvalSheet.txt"
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
