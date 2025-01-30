@@ -55,6 +55,7 @@ def clean_html(raw_html):
     raw_html = re.sub(r'<.*?>', '', raw_html)  # Remove all other HTML tags
     return raw_html.strip()
 
+
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     bot.reply_to(message, "Welcome! Use the menu below to explore commands.")
