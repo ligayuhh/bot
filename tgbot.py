@@ -63,15 +63,6 @@ def get_messages(email):
         print(f"Error fetching messages: {e}")
         return []
 
-def clean_html(raw_html):
-    raw_html = re.sub(r'<style.*?>.*?</style>', '', raw_html, flags=re.DOTALL)  # Remove CSS
-    raw_html = re.sub(r'<br\s*/?>', '\n', raw_html)  # Replace <br> with newline
-    raw_html = re.sub(r'</p>|</div>|</li>', '\n', raw_html)  # Preserve spacing for block elements
-    raw_html = re.sub(r'<.*?>', '', raw_html)  # Remove all other HTML tags
-    raw_html = re.sub(r'&nbsp;', ' ', raw_html)  # Replace non-breaking space with normal space
-    raw_html = re.sub(r'\s+', ' ', raw_html)  # Normalize multiple spaces
-    return raw_html.strip()
-
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     bot.reply_to(message, "Welcome! Use the menu below to explore commands.")
@@ -99,12 +90,12 @@ def current_inbox(message):
     messages = get_messages(current_email)
     if messages:
         formatted_messages = [
-            f"ID: {msg['id']}\nSubject: {msg['subject']}\nFrom: {msg['sender_name']} <{msg['sender_email']}>\nTimestamp: {msg['timestamp']['date']}\nContent: {clean_html(msg['content'])}"
+            f"Your Email: {current_email}\n\nID: {msg['id']}\nSubject: {msg['subject']}\nFrom: {msg['sender_name']} <{msg['sender_email']}>\nTimestamp: {msg['timestamp']['date']}"
             for msg in messages
         ]
         bot.reply_to(message, "\n\n".join(formatted_messages))
     else:
-        bot.reply_to(message, "No messages found in the current random email inbox.")
+        bot.reply_to(message, f"Your Email: {current_email}\n\nNo messages found in the inbox.")
 
 @bot.message_handler(commands=['custom_inbox'])
 def custom_inbox(message):
@@ -115,12 +106,12 @@ def custom_inbox(message):
     messages = get_messages(custom_email)
     if messages:
         formatted_messages = [
-            f"ID: {msg['id']}\nSubject: {msg['subject']}\nFrom: {msg['sender_name']} <{msg['sender_email']}>\nTimestamp: {msg['timestamp']['date']}\nMessage: {clean_html(msg['content'])}"
+            f"Your Email: {custom_email}\n\nID: {msg['id']}\nSubject: {msg['subject']}\nFrom: {msg['sender_name']} <{msg['sender_email']}>\nTimestamp: {msg['timestamp']['date']}"
             for msg in messages
         ]
         bot.reply_to(message, "\n\n".join(formatted_messages))
     else:
-        bot.reply_to(message, "No messages found in the custom email inbox.")
+        bot.reply_to(message, f"Your Email: {custom_email}\n\nNo messages found in the inbox.")
 
 bot.set_my_commands([
     telebot.types.BotCommand("start", "Start the bot"),
