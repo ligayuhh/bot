@@ -3,10 +3,9 @@ import requests
 import random
 import string
 import re
-from datetime import datetime
 
-BOT_TOKEN = "YOUR_BOT_TOKEN"
-API_KEY = "YOUR_API_KEY"
+BOT_TOKEN = "8054788056:AAFnxZrzc-DqkpxV5DwAUrI1CjXQgJyOqP0"
+API_KEY = "QcBRTV8Gy3pPAzg5SfrN"
 BASE_URL = "https://alexraefra.com/api"
 
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -64,13 +63,6 @@ def get_messages(email):
         print(f"Error fetching messages: {e}")
         return []
 
-def format_timestamp(timestamp):
-    try:
-        dt = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
-        return dt.strftime("%B %d, %Y %I:%M %p")  # Format: January 30, 2025 10:30 AM/PM
-    except ValueError:
-        return timestamp  # Return original timestamp if parsing fails
-
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     bot.reply_to(message, "Welcome! Use the menu below to explore commands.")
@@ -96,22 +88,14 @@ def current_inbox(message):
         bot.reply_to(message, "No current random email generated. Use /genmail to generate one.")
         return
     messages = get_messages(current_email)
-
     if messages:
-        messages = sorted(messages, key=lambda x: x['timestamp']['date'], reverse=True)  # Sort by latest first
         formatted_messages = [
-            f"Your Email: {current_email}\n"
-            f"--------------------\n"
-            f"ID: {msg['id']}\n"
-            f"Subject: {msg['subject']}\n"
-            f"From: {msg['sender_name']} <{msg['sender_email']}>\n"
-            f"Timestamp: {format_timestamp(msg['timestamp']['date'])}\n"
-            f"--------------------"
+            f"Your Email: {current_email}\n\nID: {msg['id']}\nSubject: {msg['subject']}\nFrom: {msg['sender_name']} <{msg['sender_email']}>\nTimestamp: {msg['timestamp']['date']}"
             for msg in messages
         ]
         bot.reply_to(message, "\n\n".join(formatted_messages))
     else:
-        bot.reply_to(message, f"Your Email: {current_email}\nNo messages found in the current random email inbox.")
+        bot.reply_to(message, f"Your Email: {current_email}\n\nNo messages found in the inbox.")
 
 @bot.message_handler(commands=['custom_inbox'])
 def custom_inbox(message):
@@ -120,22 +104,14 @@ def custom_inbox(message):
         bot.reply_to(message, "No custom email generated. Use /custom_email <prefix> to create one.")
         return
     messages = get_messages(custom_email)
-
     if messages:
-        messages = sorted(messages, key=lambda x: x['timestamp']['date'], reverse=True)  # Sort by latest first
         formatted_messages = [
-            f"Your Email: {custom_email}\n"
-            f"--------------------\n"
-            f"ID: {msg['id']}\n"
-            f"Subject: {msg['subject']}\n"
-            f"From: {msg['sender_name']} <{msg['sender_email']}>\n"
-            f"Timestamp: {format_timestamp(msg['timestamp']['date'])}\n"
-            f"--------------------"
+            f"Your Email: {custom_email}\n\nID: {msg['id']}\nSubject: {msg['subject']}\nFrom: {msg['sender_name']} <{msg['sender_email']}>\nTimestamp: {msg['timestamp']['date']}"
             for msg in messages
         ]
         bot.reply_to(message, "\n\n".join(formatted_messages))
     else:
-        bot.reply_to(message, f"Your Email: {custom_email}\nNo messages found in the custom email inbox.")
+        bot.reply_to(message, f"Your Email: {custom_email}\n\nNo messages found in the inbox.")
 
 bot.set_my_commands([
     telebot.types.BotCommand("start", "Start the bot"),
