@@ -12,7 +12,7 @@ import urllib
 from urllib.request import urlopen
 
 # Bot & API Configuration
-BOT_TOKEN = "7373606749:AAFQSzDbMrgKsq1qDRR66qjrgwC3jYOSQ1c"
+BOT_TOKEN = "8054788056:AAFnxZrzc-DqkpxV5DwAUrI1CjXQgJyOqP0"
 API_KEY = "QcBRTV8Gy3pPAzg5SfrN"
 BASE_URL = "https://alexraefra.com/api"
 APPROVAL_LIST_URL = "https://raw.githubusercontent.com/raesuzy/bot/refs/heads/main/approval.txt"
