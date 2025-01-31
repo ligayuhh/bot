@@ -12,8 +12,9 @@ bot = telebot.TeleBot(BOT_TOKEN)
 approved_users = {}  # Change to store user key and name
 admin_id = 1292741412  # Replace with your Telegram ID
 
-current_email = None
-custom_email = None
+user_emails = {}  # Store each user's random email
+custom_user_emails = {}  # Store each user's custom email
+
 
 @bot.message_handler(commands=['approved_list'])
 def approved_list(message):
@@ -36,7 +37,6 @@ def start(message):
 
 @bot.message_handler(commands=['genmail'])
 def generate_random_email(message):
-    global current_email  # Ensure we access the global variable
     user_id = message.from_user.id
     if user_id not in approved_users:
         bot.reply_to(message, "❌ You are not approved yet. Please request approval using /my_key.")
@@ -44,28 +44,31 @@ def generate_random_email(message):
 
     email = generate_email()
     if email:
-        current_email = email  # Set the current_email after generating
+        user_emails[user_id] = email  # Assign email to the user
         bot.reply_to(message, f"📧 Your generated email: {email}")
     else:
         bot.reply_to(message, "⚠️ Failed to generate email. Try again later.")
 
+
 @bot.message_handler(commands=['genmail_inbox'])
 def current_inbox(message):
-    global current_email
-    if not current_email:
+    user_id = message.from_user.id
+    email = user_emails.get(user_id)
+    
+    if not email:
         bot.reply_to(message, "No current random email generated. Use /genmail to generate one.")
         return
     
-    messages = get_messages(current_email)
+    messages = get_messages(email)
     if messages:
         formatted_messages = [f"📌 ID: {msg['id']}\n✉️ Subject: {msg['subject']}\n👤 From: {msg['sender_name']} <{msg['sender_email']}>\n🕒 Timestamp: {format_timestamp(msg['timestamp']['date'])}" for msg in messages]
-        bot.reply_to(message, f"📬 Your Email: {current_email}\n\n" + "\n\n".join(formatted_messages))
+        bot.reply_to(message, f"📬 Your Email: {email}\n\n" + "\n\n".join(formatted_messages))
     else:
-        bot.reply_to(message, f"📬 Your Email: {current_email}\n\nNo messages found in the inbox.")
+        bot.reply_to(message, f"📬 Your Email: {email}\n\nNo messages found in the inbox.")
+
 
 @bot.message_handler(commands=['custom_email'])
 def generate_custom_email_handler(message):
-    global custom_email  # Ensure we access the global variable
     user_id = message.from_user.id
     if user_id not in approved_users:
         bot.reply_to(message, "❌ You are not approved yet. Please request approval using /my_key.")
@@ -75,34 +78,30 @@ def generate_custom_email_handler(message):
         custom_prefix = message.text.split()[1]
         email = generate_custom_email(custom_prefix)
         if email:
-            custom_email = email  # Set the custom_email after generating
+            custom_user_emails[user_id] = email  # Assign custom email to the user
             bot.reply_to(message, f"📧 Your custom email: {email}")
         else:
             bot.reply_to(message, "⚠️ Failed to generate a custom email. Try again later.")
     except IndexError:
         bot.reply_to(message, "❌ Please provide a prefix. Example: /custom_email myname")
 
+
 @bot.message_handler(commands=['custom_inbox'])
 def check_custom_email_inbox(message):
-    global custom_email
     user_id = message.from_user.id
-    if user_id not in approved_users:
-        bot.reply_to(message, "❌ You are not approved yet. Please request approval using /my_key.")
-        return
+    email = custom_user_emails.get(user_id)
 
-    if not custom_email:
+    if not email:
         bot.reply_to(message, "⚠️ You don't have a custom email. Generate one using /custom_email.")
         return
 
-    messages = get_messages(custom_email)
+    messages = get_messages(email)
     if messages:
-        formatted_messages = [
-            f"📌 ID: {msg['id']}\n✉️ Subject: {msg['subject']}\n👤 From: {msg['sender_name']} <{msg['sender_email']}>\n🕒 Timestamp: {format_timestamp(msg['timestamp']['date'])}"
-            for msg in messages
-        ]
-        bot.reply_to(message, f"📬 Your Email: {custom_email}\n\n" + "\n\n".join(formatted_messages))
+        formatted_messages = [f"📌 ID: {msg['id']}\n✉️ Subject: {msg['subject']}\n👤 From: {msg['sender_name']} <{msg['sender_email']}>\n🕒 Timestamp: {format_timestamp(msg['timestamp']['date'])}" for msg in messages]
+        bot.reply_to(message, f"📬 Your Email: {email}\n\n" + "\n\n".join(formatted_messages))
     else:
-        bot.reply_to(message, f"📬 Your Email: {custom_email}\n\nNo messages found in your inbox.")
+        bot.reply_to(message, f"📬 Your Email: {email}\n\nNo messages found in your inbox.")
+
 
 def generate_user_key(user_id):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
