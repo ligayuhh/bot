@@ -3,8 +3,9 @@ import requests
 import random
 import string
 import datetime
+import shlex
 
-BOT_TOKEN = "8054788056:AAFnxZrzc-DqkpxV5DwAUrI1CjXQgJyOqP0"
+BOT_TOKEN = "7373606749:AAFQSzDbMrgKsq1qDRR66qjrgwC3jYOSQ1c"
 API_KEY = "QcBRTV8Gy3pPAzg5SfrN"
 BASE_URL = "https://alexraefra.com/api"
 
@@ -33,7 +34,7 @@ def start(message):
     if user_id not in approved_users:
         bot.reply_to(message, "❌ You are not approved yet. Please request approval using /my_key.")
         return
-    bot.reply_to(message, "🤖 Welcome! You are approved. Use /genmail to generate an email.")
+    bot.reply_to(message, "🤖 Welcome to our bot! We're glad to have you here. You are now approved to use our features. Type /genmail to generate your email!")
 
 @bot.message_handler(commands=['genmail'])
 def generate_random_email(message):
@@ -42,7 +43,7 @@ def generate_random_email(message):
         bot.reply_to(message, "❌ You are not approved yet. Please request approval using /my_key.")
         return
 
-    email = generate_email()
+    email = generate_email(user_id)
     if email:
         user_emails[user_id] = email  # Assign email to the user
         bot.reply_to(message, f"📧 Your generated email: {email}")
@@ -76,7 +77,7 @@ def generate_custom_email_handler(message):
 
     try:
         custom_prefix = message.text.split()[1]
-        email = generate_custom_email(custom_prefix)
+        email = generate_custom_email(custom_prefix, user_id)
         if email:
             custom_user_emails[user_id] = email  # Assign custom email to the user
             bot.reply_to(message, f"📧 Your custom email: {email}")
@@ -116,13 +117,14 @@ def get_domains():
         print(f"Error fetching domains: {e}")
         return []
 
-def generate_email():
+def generate_email(user_id):
     global current_email
     domains = get_domains()
     if not domains:
         return None
     random_domain = random.choice(domains)
-    email = "".join(random.choices(string.ascii_letters + string.digits, k=10)) + "@" + random_domain
+    email_prefix = "".join(random.choices(string.ascii_letters + string.digits, k=10))
+    email = f"{email_prefix}_{user_id}@{random_domain}"
     try:
         requests.get(f"{BASE_URL}/email/{email}/{API_KEY}")
     except requests.RequestException as e:
@@ -131,13 +133,13 @@ def generate_email():
     current_email = email
     return email
 
-def generate_custom_email(custom_prefix):
+def generate_custom_email(custom_prefix, user_id):
     global custom_email
     domains = get_domains()
     if not domains:
         return None
     random_domain = random.choice(domains)
-    email = f"{custom_prefix}@{random_domain}"
+    email = f"{custom_prefix}_{user_id}@{random_domain}"
     try:
         requests.get(f"{BASE_URL}/email/{email}/{API_KEY}")
     except requests.RequestException as e:
@@ -189,6 +191,65 @@ def revoke_user(message):
     else:
         bot.reply_to(message, "❌ You are not authorized to revoke users.")
 
+@bot.message_handler(commands=['bulk_approve'])
+def bulk_approve(message):
+    if message.from_user.id == admin_id:
+        parts = shlex.split(message.text)[1:]  # Remove '/bulk_approve' and handle quoted names
+        approved_list = []
+
+        if len(parts) % 2 != 0:
+            bot.reply_to(message, "❌ Invalid format! Use: /bulk_approve ID1 Name1 ID2 Name2 ...")
+            return
+
+        for i in range(0, len(parts), 2):
+            try:
+                user_id = int(parts[i])  # Convert the user_id to an integer
+                user_name = parts[i + 1]  # Get the user name
+                user_key = generate_user_key(user_id)  # Pass user_id to the function
+                approved_users[user_id] = (user_key, user_name)
+                approved_list.append(f"✅ {user_id} ({user_name})")
+            except ValueError:
+                continue
+
+        if approved_list:
+            bot.reply_to(message, "Bulk Approval Completed:\n" + '\n'.join(approved_list))
+        else:
+            bot.reply_to(message, "❌ No valid users approved.")
+    else:
+        bot.reply_to(message, "❌ You are not authorized to approve users.")
+    
+
+@bot.message_handler(commands=['bulk_revoke'])
+def bulk_revoke(message):
+    if message.from_user.id == admin_id:
+        parts = shlex.split(message.text)[1:]  # Remove '/bulk_revoke' and handle quoted names
+        revoked_list = []
+
+        if len(parts) % 2 != 0:
+            bot.reply_to(message, "❌ Invalid format! Use: /bulk_revoke ID1 Name1 ID2 Name2 ...")
+            return
+
+        for i in range(0, len(parts), 2):
+            try:
+                user_id = int(parts[i])  # Convert the user_id to an integer
+                user_name = parts[i + 1]  # Get the user name
+
+                if user_id in approved_users:
+                    del approved_users[user_id]
+                    revoked_list.append(f"✅ {user_id} ({user_name}) revoked")
+                else:
+                    revoked_list.append(f"⚠️ {user_id} ({user_name}) not found in the approved list")
+            except ValueError:
+                continue
+
+        if revoked_list:
+            bot.reply_to(message, "Bulk Revocation Completed:\n" + '\n'.join(revoked_list))
+        else:
+            bot.reply_to(message, "❌ No valid users revoked.")
+    else:
+        bot.reply_to(message, "❌ You are not authorized to revoke users.")
+
+
 @bot.message_handler(commands=['my_key'])
 def get_user_key(message):
     user_id = message.from_user.id
@@ -215,7 +276,9 @@ bot.set_my_commands([
     telebot.types.BotCommand("my_key", "Get your key"),
     telebot.types.BotCommand("check_key", "Check if your key is approved"),
     telebot.types.BotCommand("approve", "Approve a user (Admin only)"),
-    telebot.types.BotCommand("revoke", "Revoke a user's approval (Admin only)")
+    telebot.types.BotCommand("revoke", "Revoke a user's approval (Admin only)"),
+    telebot.types.BotCommand("bulk_approve", "Approve bulk user's approval (Admin only)"),
+    telebot.types.BotCommand("bulk_revoke", "Revoke bulk user's approval (Admin only)"),
 ])
 
 bot.polling()
