@@ -19,7 +19,7 @@ custom_user_emails = {}  # Store each user's custom email
 
 @bot.message_handler(commands=['approved_list'])
 def approved_list(message):
-    if message.from_user.id == admin_id:
+    if message.from_user.id == admin_ids:
         if approved_users:
             user_list = "\n".join([f"ID: {user_id}, Name: {user_name}" for user_id, (user_key, user_name) in approved_users.items()])
             bot.reply_to(message, f"✅ Approved Users:\n{user_list}")
@@ -167,7 +167,7 @@ def get_messages(email):
 
 @bot.message_handler(commands=['approve'])
 def approve_user(message):
-    if message.from_user.id == admin_id:
+    if message.from_user.id == admin_ids:
         try:
             user_id, user_name = map(str, message.text.split()[1:3])  # Expect user ID and user name
             user_id = int(user_id)
@@ -181,7 +181,7 @@ def approve_user(message):
 
 @bot.message_handler(commands=['revoke'])
 def revoke_user(message):
-    if message.from_user.id == admin_id:
+    if message.from_user.id == admin_ids:
         try:
             user_id = int(message.text.split()[1])
             approved_users.pop(user_id, None)
