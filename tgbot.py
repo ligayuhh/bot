@@ -11,7 +11,7 @@ BASE_URL = "https://alexraefra.com/api"
 
 bot = telebot.TeleBot(BOT_TOKEN)
 approved_users = {}  # Change to store user key and name
-admin_id = 1292741412  # Replace with your Telegram ID
+admin_ids = [1292741412, 6316475598]  # Replace with your Telegram ID
 
 user_emails = {}  # Store each user's random email
 custom_user_emails = {}  # Store each user's custom email
