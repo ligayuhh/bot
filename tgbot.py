@@ -193,61 +193,65 @@ def revoke_user(message):
 
 @bot.message_handler(commands=['bulk_approve'])
 def bulk_approve(message):
-    if message.from_user.id == admin_ids:
-        parts = shlex.split(message.text)[1:]  # Remove '/bulk_approve' and handle quoted names
-        approved_list = []
+    if message.from_user.id not in admin_ids:
+        bot.reply_to(message, "❌ You are not authorized to approve users.")
+        return
 
-        if len(parts) % 2 != 0:
-            bot.reply_to(message, "❌ Invalid format! Use: /bulk_approve ID1 Name1 ID2 Name2 ...")
-            return
+    parts = shlex.split(message.text)[1:]
+    approved_list = []
 
-        for i in range(0, len(parts), 2):
-            try:
-                user_id = int(parts[i])  # Convert the user_id to an integer
-                user_name = parts[i + 1]  # Get the user name
-                user_key = generate_user_key(user_id)  # Pass user_id to the function
-                approved_users[user_id] = (user_key, user_name)
-                approved_list.append(f"✅ {user_id} ({user_name})")
-            except ValueError:
+    if len(parts) % 2 != 0:
+        bot.reply_to(message, "❌ Invalid format! Use: /bulk_approve ID1 Name1 ID2 Name2 ...")
+        return
+
+    for i in range(0, len(parts), 2):
+        try:
+            user_id = int(parts[i])
+            user_name = parts[i + 1]
+
+            if user_id in approved_users:
+                approved_list.append(f"⚠️ {user_id} ({user_name}) is already approved")
                 continue
 
-        if approved_list:
-            bot.reply_to(message, "Bulk Approval Completed:\n" + '\n'.join(approved_list))
-        else:
-            bot.reply_to(message, "❌ No valid users approved.")
-    else:
-        bot.reply_to(message, "❌ You are not authorized to approve users.")
-    
+            user_key = generate_user_key(user_id)
+            approved_users[user_id] = (user_key, user_name)
+            approved_list.append(f"✅ {user_id} ({user_name}) approved")
+
+        except ValueError:
+            bot.reply_to(message, f"❌ Invalid user ID: {parts[i]}")
+            return
+
+    bot.reply_to(message, "Bulk Approval Completed:\n" + '\n'.join(approved_list) if approved_list else "❌ No valid users approved.")
 
 @bot.message_handler(commands=['bulk_revoke'])
 def bulk_revoke(message):
-    if message.from_user.id == admin_ids:
-        parts = shlex.split(message.text)[1:]  # Remove '/bulk_revoke' and handle quoted names
-        revoked_list = []
+    if message.from_user.id not in admin_ids:
+        bot.reply_to(message, "❌ You are not authorized to revoke users.")
+        return
 
-        if len(parts) % 2 != 0:
-            bot.reply_to(message, "❌ Invalid format! Use: /bulk_revoke ID1 Name1 ID2 Name2 ...")
+    parts = shlex.split(message.text)[1:]
+    revoked_list = []
+
+    if len(parts) % 2 != 0:
+        bot.reply_to(message, "❌ Invalid format! Use: /bulk_revoke ID1 Name1 ID2 Name2 ...")
+        return
+
+    for i in range(0, len(parts), 2):
+        try:
+            user_id = int(parts[i])
+            user_name = parts[i + 1]
+
+            if user_id in approved_users:
+                del approved_users[user_id]
+                revoked_list.append(f"✅ {user_id} ({user_name}) revoked")
+            else:
+                revoked_list.append(f"⚠️ {user_id} ({user_name}) not found in approved list")
+
+        except ValueError:
+            bot.reply_to(message, f"❌ Invalid user ID: {parts[i]}")
             return
 
-        for i in range(0, len(parts), 2):
-            try:
-                user_id = int(parts[i])  # Convert the user_id to an integer
-                user_name = parts[i + 1]  # Get the user name
-
-                if user_id in approved_users:
-                    del approved_users[user_id]
-                    revoked_list.append(f"✅ {user_id} ({user_name}) revoked")
-                else:
-                    revoked_list.append(f"⚠️ {user_id} ({user_name}) not found in the approved list")
-            except ValueError:
-                continue
-
-        if revoked_list:
-            bot.reply_to(message, "Bulk Revocation Completed:\n" + '\n'.join(revoked_list))
-        else:
-            bot.reply_to(message, "❌ No valid users revoked.")
-    else:
-        bot.reply_to(message, "❌ You are not authorized to revoke users.")
+    bot.reply_to(message, "Bulk Revocation Completed:\n" + '\n'.join(revoked_list) if revoked_list else "❌ No valid users revoked.")
 
 
 @bot.message_handler(commands=['my_key'])
