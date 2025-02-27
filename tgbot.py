@@ -4,6 +4,7 @@ import random
 import string
 import datetime
 import shlex
+from datetime import datetime
 
 BOT_TOKEN = "8054788056:AAFnxZrzc-DqkpxV5DwAUrI1CjXQgJyOqP0"
 API_KEY = "cwV2tq1EF9D84Y7jBiln"
@@ -123,8 +124,9 @@ def generate_email(user_id):
     if not domains:
         return None
     random_domain = random.choice(domains)
-    email_prefix = "".join(random.choices(string.ascii_letters + string.digits, k=10))
-    email = f"{email_prefix}_{user_id}@{random_domain}"
+    timestamp = datetime.now().strftime("%m_%d_%I_%M%p")
+    email_prefix = "".join(random.choices(string.ascii_letters + string.digits, k=5))
+    email = f"{email_prefix}_{user_id}_{timestamp}@{random_domain}"
     try:
         requests.get(f"{BASE_URL}/email/{email}/{API_KEY}")
     except requests.RequestException as e:
