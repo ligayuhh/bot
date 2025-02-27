@@ -124,7 +124,7 @@ def generate_email(user_id):
     if not domains:
         return None
     random_domain = random.choice(domains)
-    timestamp = datetime.now().strftime("%m_%d_%I_%M%p")
+    timestamp = datetime.now().strftime("%m_%d")
     email_prefix = "".join(random.choices(string.ascii_letters + string.digits, k=6))
     email = f"{email_prefix}_{user_id}_{timestamp}@{random_domain}"
     try:
