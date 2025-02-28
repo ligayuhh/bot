@@ -7,7 +7,7 @@ import shlex
 from datetime import datetime
 
 BOT_TOKEN = "8054788056:AAFnxZrzc-DqkpxV5DwAUrI1CjXQgJyOqP0"
-API_KEY = "scJm6HQ2O1aDk5qrlEog"
+API_KEY = "82jWHSytGXMmoO490vqY"
 BASE_URL = "https://alexraefra.com/api"
 
 bot = telebot.TeleBot(BOT_TOKEN)
