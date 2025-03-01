@@ -124,8 +124,9 @@ def generate_email(user_id):
         return None
     # random_domain = random.choice(domains)
     random_domain = "alexraefra.com"
+    date_timestamp = datetime.now().strftime("%m_%d")
     email_prefix = "".join(random.choices(string.ascii_letters + string.digits, k=7))
-    email = f"{email_prefix}_{user_id}@{random_domain}"
+    email = f"{email_prefix}_{user_id}_{date_timestamp}@{random_domain}"
     try:
         requests.get(f"{BASE_URL}/email/{email}/{API_KEY}")
     except requests.RequestException as e:
@@ -276,8 +277,6 @@ bot.set_my_commands([
     telebot.types.BotCommand("start", "Start the bot"),
     telebot.types.BotCommand("genmail", "Generate a random email"),
     telebot.types.BotCommand("genmail_inbox", "Check inbox for current email"),
-    telebot.types.BotCommand("custom_email", "Generate a custom email"),
-    telebot.types.BotCommand("custom_inbox", "Check inbox for custom email"),
     telebot.types.BotCommand("approved_list", "View list of approved users (Admin only)"),
     telebot.types.BotCommand("my_key", "Get your key"),
     telebot.types.BotCommand("check_key", "Check if your key is approved"),
