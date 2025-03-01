@@ -125,7 +125,7 @@ def generate_email(user_id):
         return None
     # random_domain = random.choice(domains)
     random_domain = "alexraefra.com"
-    date_timestamp = (datetime.utcnow() + timedelta(hours=8)).strftime("%m_%d")  # UTC+8 for Manila
+    date_timestamp = (datetime.utcnow() + timedelta(hours=8)).strftime("%m_%d")
     email_prefix = "".join(random.choices(string.ascii_letters + string.digits, k=7))
     email = f"{email_prefix}_{user_id}_{date_timestamp}@{random_domain}"
     try:
@@ -154,7 +154,8 @@ def generate_custom_email(custom_prefix, user_id):
 
 def format_timestamp(timestamp):
     try:
-        dt = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+        # dt = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+        dt = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
         return dt.strftime("%B %d, %Y %I:%M %p")
     except ValueError:
         return timestamp
