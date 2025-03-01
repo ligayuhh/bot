@@ -4,10 +4,9 @@ import random
 import string
 import datetime
 import shlex
-from datetime import datetime
 
 BOT_TOKEN = "8054788056:AAFnxZrzc-DqkpxV5DwAUrI1CjXQgJyOqP0"
-API_KEY = "F2Lu08WAYp4rO9XZlzcy"
+API_KEY = "AarRC3pQebX9EL85GyDS"
 BASE_URL = "https://alexraefra.com/api"
 
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -123,11 +122,9 @@ def generate_email(user_id):
     domains = get_domains()
     if not domains:
         return None
-    # random_domain = random.choice(domains)
-    random_domain = "alexraefra.com"
-    timestamp = datetime.now().strftime("%m_%d")
-    email_prefix = "".join(random.choices(string.ascii_letters + string.digits, k=6))
-    email = f"{email_prefix}_{user_id}_{timestamp}@{random_domain}"
+    random_domain = random.choice(domains)
+    email_prefix = "".join(random.choices(string.ascii_letters + string.digits, k=7))
+    email = f"{email_prefix}_{user_id}@{random_domain}"
     try:
         requests.get(f"{BASE_URL}/email/{email}/{API_KEY}")
     except requests.RequestException as e:
@@ -141,8 +138,7 @@ def generate_custom_email(custom_prefix, user_id):
     domains = get_domains()
     if not domains:
         return None
-    # random_domain = random.choice(domains)
-    random_domain = "alexraefra.com"
+    random_domain = random.choice(domains)
     email = f"{custom_prefix}_{user_id}@{random_domain}"
     try:
         requests.get(f"{BASE_URL}/email/{email}/{API_KEY}")
