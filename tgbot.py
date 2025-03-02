@@ -125,9 +125,8 @@ def generate_email(user_id):
         return None
     # random_domain = random.choice(domains)
     random_domain = "alexraefra.com"
-    date_timestamp = (datetime.utcnow() + timedelta(hours=8)).strftime("%m_%d")
     email_prefix = "".join(random.choices(string.ascii_letters + string.digits, k=7))
-    email = f"{email_prefix}_{user_id}_{date_timestamp}@{random_domain}"
+    email = f"{email_prefix}_{user_id}@{random_domain}"
     try:
         requests.get(f"{BASE_URL}/email/{email}/{API_KEY}")
     except requests.RequestException as e:
