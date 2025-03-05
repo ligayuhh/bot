@@ -124,7 +124,8 @@ def generate_email(user_id):
     if not domains:
         return None
     # random_domain = random.choice(domains)
-    random_domain = "alexraefra.com"
+    # random_domain = "alexraefra.com"
+    random_domain = random.choice(["smartregmail.com", "inboxpro-mail.com"])
     email_prefix = "".join(random.choices(string.ascii_letters + string.digits, k=7))
     email = f"{email_prefix}_{user_id}@{random_domain}"
     try:
